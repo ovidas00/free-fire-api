@@ -52,7 +52,3 @@ def get_account_info():
     return_data = asyncio.run(lib2.GetAccountInformation(uid, "7", region, "/GetPlayerPersonalShow"))
     formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
     return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
-
-
-if __name__ == '__main__':
-    app.run(port=3000, host='0.0.0.0', debug=True)
