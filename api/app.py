@@ -6,7 +6,7 @@ import json
 import asyncio
 
 # Import local modules as a package
-from project import lib2
+from api import lib2
 
 app = Flask(__name__)
 CORS(app)

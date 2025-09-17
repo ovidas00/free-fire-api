@@ -1,5 +1,5 @@
 # import proto modules as package
-from project.proto import FreeFire_pb2, main_pb2, AccountPersonalShow_pb2
+from api.proto import FreeFire_pb2, main_pb2, AccountPersonalShow_pb2
 import httpx
 import asyncio
 import json
