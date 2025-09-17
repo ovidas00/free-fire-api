@@ -1,0 +1,53 @@
+from functools import wraps
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from cachetools import TTLCache
+import json
+import asyncio
+
+# Import local modules as a package
+from project import lib2
+
+app = Flask(__name__)
+CORS(app)
+
+# Create a cache with a TTL (time-to-live) of 300 seconds (5 minutes)
+cache = TTLCache(maxsize=100, ttl=300)
+
+def cached_endpoint(ttl=300):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            cache_key = (request.path, tuple(request.args.items()))
+            if cache_key in cache:
+                return cache[cache_key]
+            else:
+                result = func(*args, **kwargs)
+                cache[cache_key] = result
+                return result
+        return wrapper
+    return decorator
+
+@app.route('/api/account')
+@cached_endpoint()
+def get_account_info():
+    region = request.args.get('region')
+    uid = request.args.get('uid')
+    
+    if not uid:
+        return jsonify({
+            "error": "Invalid request",
+            "message": "Empty 'uid' parameter. Please provide a valid 'uid'."
+        }), 400, {'Content-Type': 'application/json; charset=utf-8'}
+
+    if not region:
+        return jsonify({
+            "error": "Invalid request",
+            "message": "Empty 'region' parameter. Please provide a valid 'region'."
+        }), 400, {'Content-Type': 'application/json; charset=utf-8'}
+
+    return_data = asyncio.run(lib2.GetAccountInformation(uid, "7", region, "/GetPlayerPersonalShow"))
+    formatted_json = json.dumps(return_data, indent=2, ensure_ascii=False)
+    return formatted_json, 200, {'Content-Type': 'application/json; charset=utf-8'}
+
+# no __main__ block, Vercel imports app directly
